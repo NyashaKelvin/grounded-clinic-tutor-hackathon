@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grounded Clinical Tutor</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#fff; --ink:#16202c; --muted:#5b6776; --line:#dde3ea;
+    --green:#0f7b4a; --green-bg:#e3f5ec; --amber:#a35b00; --amber-bg:#fff1d6;
+    --red:#a3271f; --red-bg:#fde7e5; --accent:#1b5fd1; --mn:#12305e;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#10151c;--card:#182029;--ink:#e8edf3;--muted:#9aa7b6;--line:#2a3542;
+      --green:#5fd39b;--green-bg:#123324;--amber:#f0b95a;--amber-bg:#3a2b0e;--red:#ff8f86;--red-bg:#3d1916;--accent:#6da2ff;--mn:#dbe8ff}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:20px 16px 40px}
+  h1{font-size:1.5rem;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 14px}
+  .disclaimer{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber);border-radius:8px;padding:8px 12px;font-size:.9rem;margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  label{display:flex;justify-content:space-between;align-items:center;font-weight:600;margin-bottom:6px}
+  textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;background:var(--bg);color:var(--ink);resize:vertical}
+  #source{min-height:300px}
+  #question{min-height:80px}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;padding:10px 22px;font-size:1rem}
+  button:disabled{opacity:.6;cursor:wait}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .chip{font-size:.82rem;padding:4px 10px;border-radius:99px}
+  #result{margin-top:16px}
+  .badge{display:block;font-weight:700;padding:10px 14px;border-radius:8px;margin-bottom:14px}
+  .b-grounded{background:var(--green-bg);color:var(--green);border:1px solid var(--green)}
+  .b-not_found{background:var(--red-bg);color:var(--red);border:1px solid var(--red)}
+  .b-unverified{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber)}
+  .sec{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 4px;font-weight:700}
+  .explain{white-space:pre-wrap}
+  .mnemonic{font-size:1.7rem;font-weight:800;color:var(--mn);background:var(--bg);border:2px dashed var(--accent);border-radius:12px;padding:16px;text-align:center;white-space:pre-wrap}
+  blockquote{margin:0;padding:8px 12px;border-left:4px solid var(--green);background:var(--bg);color:var(--muted);font-size:.92rem;white-space:pre-wrap}
+  .err{background:var(--red-bg);color:var(--red);border:1px solid var(--red);padding:10px 14px;border-radius:8px}
+  footer{margin-top:24px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Grounded Clinical Reasoning Tutor</h1>
+  <p class="sub">Explains and builds memory aids <b>only</b> from material you trust &mdash; and tells you when it can't.</p>
+  <div class="disclaimer" role="note">⚠️ AI-generated study aid. Verify against your course material and instructor before clinical use.</div>
+
+  <div class="grid">
+    <div class="card">
+      <label for="source">1. Your verified course material
+        <button type="button" id="loadSample">Load hyperkalemia example</button>
+      </label>
+      <textarea id="source" placeholder="Paste a textbook excerpt, lecture note, or protocol sheet here…"></textarea>
+    </div>
+    <div class="card">
+      <label for="question">2. Your question</label>
+      <textarea id="question" placeholder="e.g. What do I do first for a patient with potassium of 7.8?"></textarea>
+      <div class="row">
+        <button class="primary" id="ask">Ask</button>
+        <span class="sub" id="status" style="margin:0"></span>
+      </div>
+      <div class="row">
+        <span class="sub" style="margin:0">Try:</span>
+        <button type="button" class="chip" data-q="What do I do first for a patient with potassium of 7.8?">In the material</button>
+        <button type="button" class="chip" data-q="What dose of furosemide should I give for hyperkalemia?">Not in the material</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="result" aria-live="polite"></div>
+  <footer>Grounding is prompt-enforced and checked by verifying the quoted passage exists in your text. It is not a substitute for clinical judgement.</footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const BADGES = {
+  grounded:   ["b-grounded",   "✅ Grounded in your material"],
+  not_found:  ["b-not_found",  "⚠️ Not found in provided material — verify independently"],
+  unverified: ["b-unverified", "⚠️ Partly unverified — the supporting quote wasn't found in your material. Check it yourself."],
+};
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;   // textContent only: model output is never parsed as HTML
+  return e;
+}
+
+function render(r) {
+  const box = $("result");
+  box.replaceChildren();
+  const card = el("div", "card");
+  const [cls, label] = BADGES[r.status] || BADGES.unverified;
+  card.append(el("span", "badge " + cls, label));
+
+  card.append(el("div", "sec", "Explanation"), el("div", "explain", r.explanation));
+
+  if (r.mnemonic) {
+    card.append(el("div", "sec", "Mnemonic"), el("div", "mnemonic", r.mnemonic));
+    if ("speechSynthesis" in window) {
+      const b = el("button", null, "🔊 Read aloud");
+      b.style.marginTop = "8px";
+      b.onclick = () => { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance(r.mnemonic)); };
+      card.append(b);
+    }
+  }
+  if (r.source_excerpt_used) card.append(el("div", "sec", "Passage from your material"), el("blockquote", null, r.source_excerpt_used));
+  if (r.confidence_note) card.append(el("div", "sec", "Confidence note"), el("div", null, r.confidence_note));
+  box.append(card);
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+async function ask() {
+  const btn = $("ask"), box = $("result");
+  btn.disabled = true; $("status").textContent = "Thinking…"; box.replaceChildren();
+  try {
+    const res = await fetch("/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source: $("source").value, question: $("question").value }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Request failed");
+    render(data);
+  } catch (e) {
+    box.append(el("div", "err", "Error: " + e.message));
+  } finally {
+    btn.disabled = false; $("status").textContent = "";
+  }
+}
+
+$("ask").onclick = ask;
+$("question").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) ask(); });
+document.querySelectorAll("[data-q]").forEach((b) => b.onclick = () => { $("question").value = b.dataset.q; });
+$("loadSample").onclick = async () => {
+  $("source").value = await (await fetch("/sample/hyperkalemia.txt")).text();
+  if (!$("question").value) $("question").value = "What do I do first for a patient with potassium of 7.8?";
+};
+</script>
+</body>
+</html>

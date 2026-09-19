@@ -1,0 +1,15 @@
+Emergency Management of Severe Hyperkalemia (Course Protocol Sheet)
+
+Severe hyperkalemia is defined as a serum potassium of 6.5 mmol/L or higher, or any elevated potassium with ECG changes such as peaked T waves, widened QRS, or loss of P waves. Untreated, it can cause life-threatening cardiac arrhythmias.
+
+Treatment follows a fixed sequence. Each step has a different purpose:
+
+Step 1 - Protect the heart: Give IV calcium (calcium gluconate 10%, 10 mL over 2 to 3 minutes) first. Calcium does not lower the potassium level. It stabilises the cardiac cell membrane so the heart is protected from arrhythmia while the other treatments take effect. Repeat the dose if ECG changes persist after 5 minutes.
+
+Step 2 - Shift potassium into cells: Give 10 units of regular insulin IV together with 50 mL of 50% dextrose. Insulin drives potassium from the blood into the cells. The dextrose is given to prevent hypoglycaemia. Check blood glucose hourly for at least 4 to 6 hours after, because hypoglycaemia can occur late.
+
+Step 3 - Remove potassium from the body: Give a potassium binder such as sodium zirconium cyclosilicate (Lokelma) 10 g orally, or sodium polystyrene sulfonate (Kayexalate). These bind potassium in the gut so it leaves the body in the stool. This step works slowly, over hours.
+
+Nursing responsibilities: Place the patient on continuous cardiac monitoring. Obtain a repeat potassium level after treatment. Document the ECG before and after treatment. Notify the doctor immediately of any new arrhythmia.
+
+Note: Calcium comes first because the immediate danger is the heart rhythm, not the number on the lab report.
