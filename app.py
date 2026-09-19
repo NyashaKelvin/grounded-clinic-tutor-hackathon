@@ -146,6 +146,8 @@ def render_learning_map(r, key: str):
 
 def render_result(r, key: str):
     label, cls = STATE_LOOK[r.state]
+    if r.state == State.GROUNDED and r.verification.get("withheld"):
+        label, cls = "Answered from the approved sources (some points withheld)", "b-warn"
     st.markdown(f'<span class="badge {cls}">{label}</span>', unsafe_allow_html=True)
     if r.message:
         st.markdown(f'<div class="callout c-{cls}">{esc(r.message)}</div>', unsafe_allow_html=True)
@@ -245,7 +247,7 @@ if not api_key:
         st.stop()
 
 try:
-    tutor_obj = st.cache_resource(runtime.load_tutor, show_spinner="Loading the source index...")(api_key, True)
+    tutor_obj = st.cache_resource(runtime.load_tutor, show_spinner="Loading the source index...")(api_key, False)
 except runtime.SetupError as exc:
     st.markdown(f'<div class="callout c-b-bad">{esc(str(exc))}</div>', unsafe_allow_html=True)
     st.stop()
@@ -337,7 +339,7 @@ with tab_bench:
 with tab_src:
     with st.expander("Settings"):
         tutor_obj.strict = st.toggle("Strict verification", value=tutor_obj.strict,
-                                     help="On: if any quote or number fails the check, no answer is shown. Turn off only for testing.")
+                                     help="On: if any quote or number fails the check, no answer is shown at all. Off (default): points that verified are shown and failed ones are withheld, with a notice.")
         st.caption("Needs an internet connection. Refreshing the page clears the current answer and your progress ticks.")
     seen = {}
     for c in tutor_obj.index.chunks:

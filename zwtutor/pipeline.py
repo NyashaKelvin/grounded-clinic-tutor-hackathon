@@ -114,17 +114,31 @@ class Tutor:
             return self._res(State.CANNOT_VERIFY, mode, M.CANNOT_VERIFY, **base, verification=vsum, limitations=limitations)
 
         # non-strict mode keeps only claims that verified
-        pts = [r for r in pts if r.verified]
+        all_pts = pts  # the model numbered its memory-aid letters against THIS list
+        newidx, k = {}, 0
+        for i, r in enumerate(all_pts):
+            if r.verified:
+                newidx[i] = k
+                k += 1
+        pts = [r for r in all_pts if r.verified]
         points = [{"text": r.text, "citations": self._views(r), "verified": True} for r in pts]
         quiz_out = [{**x["q"], "citations": self._views(x["res"])} for x in quiz if x["ok"]]
         cards_out = [{**x["c"], "citations": self._views(x["res"])} for x in cards if x["ok"]]
 
         aid = None
         if mode == "mnemonic":
-            aid, why = verify_memory_aid(raw.get("memory_aid"), pts)
+            aid, why = verify_memory_aid(raw.get("memory_aid"), all_pts)
+            if aid is not None:  # renumber to the points actually shown
+                for l in aid["letters"]:
+                    l["point_index"] = newidx[l["point_index"]]
             if aid is None:
                 limitations.append(f"No memory aid is shown: {why or 'none was produced'}.")
 
+        withheld = len([p for p in problems if not p.startswith("summary")])
+        vsum["withheld"] = withheld
+        if withheld:  # verified-only mode: shown claims all verified, the rest are held back and the learner is told
+            limitations.append(f"{withheld} point(s) were withheld because their quote or numbers could not be verified against the source, "
+                               "so this answer may be incomplete. Use the source links, or switch on Strict verification in Sources > Settings.")
         result = self._res(State.GROUNDED, mode, "", **base, answer=summary, points=points, memory_aid=aid,
                            quiz=quiz_out, cards=cards_out, limitations=limitations, verification=vsum)
         if scenario:

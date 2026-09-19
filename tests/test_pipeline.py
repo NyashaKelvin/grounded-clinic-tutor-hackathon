@@ -220,3 +220,39 @@ class EnvIsReadLate(unittest.TestCase):
         with mock.patch.dict(os.environ, {"GEMINI_MODEL": "gemini-9.9-flash", "GEMINI_FALLBACK_MODELS": "a,b"}):
             g = GeminiGenerator(client=object())
             self.assertEqual((g.model, g.fallbacks), ("gemini-9.9-flash", ["a", "b"]))
+
+
+class VerifiedOnly(unittest.TestCase):
+    def test_partial_answer_is_shown_with_a_notice(self):
+        T.setUpClass()
+        try:
+            t = T("test_grounded")
+            o = t.good()
+            o["points"].append({"text": "Zorbex cures everything.", "citations": [{"chunk_id": T.zorbex_id, "quote": "cures everything at all times"}]})
+            tut, _ = t.tutor(o, strict=False)
+            r = tut.ask("How is Zorbex dosed for adults?")
+            self.assertEqual(r.state, State.GROUNDED)
+            self.assertEqual(len(r.points), 1)
+            self.assertEqual(r.verification["withheld"], 1)
+            self.assertTrue(any("withheld" in x for x in r.limitations))
+        finally:
+            T.tearDownClass()
+
+
+class AidRenumber(unittest.TestCase):
+    def test_memory_aid_points_follow_the_points_that_are_shown(self):
+        T.setUpClass()
+        try:
+            t = T("test_grounded")
+            cite = [{"chunk_id": T.zorbex_id, "quote": T.quote}]
+            o = t.good()
+            o["points"] = [
+                {"text": "Bad claim here.", "citations": [{"chunk_id": T.zorbex_id, "quote": "this quote is not in the source at all"}]},
+                {"text": "Adults get Zorbex 5 mg twice daily for 7 days.", "citations": cite},
+            ]
+            o["memory_aid"] = {"text": "Z", "letters": [{"stands_for": "Zorbex", "point_index": 1}]}
+            r = t.tutor(o, strict=False)[0].ask("How is Zorbex dosed for adults?", "mnemonic")
+            self.assertEqual(r.state, State.GROUNDED)
+            self.assertEqual(r.memory_aid["letters"][0]["point_index"], 0)  # now the first shown point
+        finally:
+            T.tearDownClass()
