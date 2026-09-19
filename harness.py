@@ -764,10 +764,11 @@ def _():
         return (WARN, f"{len(unl)} grounded questions still need a human to confirm the passage and fill expected_chunk_ids")
 
 
-@check(K, "Spec 16", ".gitignore keeps downloaded PDFs and built index out of git")
+@check(K, "Spec 16", ".gitignore keeps PDFs and the embed cache out of git but allows the built index (deploy without rebuild)")
 def _():
     lines = {l.strip() for l in read(".gitignore").splitlines()}
-    missing = [x for x in ("corpus/pdfs/", "corpus/chunks.jsonl", "corpus/vectors.npy") if x not in lines]
+    missing = [x for x in ("corpus/pdfs/", "corpus/.embed_cache.npz") if x not in lines]
+    assert "corpus/chunks.jsonl" not in lines and "corpus/vectors.npy" not in lines, "the built index must be committable for deployment"
     assert not missing, f"missing: {missing}"
 
 
@@ -782,10 +783,22 @@ def _():
     from unittest import mock
     from streamlit.testing.v1 import AppTest
     from zwtutor import ingest
-    with mock.patch.object(ingest, "CHUNKS", ROOT / "corpus" / "__missing__.jsonl"):
+    with mock.patch.object(ingest, "CHUNKS", ROOT / "corpus" / "__missing__.jsonl"), mock.patch.dict(os.environ, {"GEMINI_API_KEY": "test-key"}):
         at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30).run()
     assert not at.exception, [e.value for e in at.exception]
-    assert any("corpus" in e.value.lower() for e in at.error)
+    assert any("corpus" in m.value.lower() and "built" in m.value.lower() for m in at.markdown), "no setup instruction shown"
+
+
+@check(K, "Spec 9 / Guide 8", "New app.py without a key asks for it on the page (password box, no sidebar), and shows nothing else")
+def _():
+    from unittest import mock
+    from streamlit.testing.v1 import AppTest
+    from zwtutor import runtime
+    with mock.patch.object(runtime, "get_key", lambda: ""):
+        at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30).run()
+    assert not at.exception, [e.value for e in at.exception]
+    assert at.text_input and at.text_input[0].proto.type == 1, "no password-type key box"
+    assert len(at.sidebar.children) == 0, "sidebar is showing"
 
 
 # ================================================================ J. MANUAL

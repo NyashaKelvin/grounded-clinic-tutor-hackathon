@@ -6,7 +6,7 @@ A study aid for Zimbabwean nursing students that answers **only** from a curated
 
 **Participants:** Leroy Mapunzwana, Nyasha Madoro, Euclide Mtisi, Ethel Kuvirima
 
-**Deployed app:** not deployed yet (the source PDFs are not stored in this repository, so the app is run locally; see [Run locally](#run-locally)). If a hosted version is added, put the link here: `[PLACEHOLDER: deployed URL]`.
+**Deployed app:** `[PLACEHOLDER: Streamlit Community Cloud URL]` (see [Deploy to Streamlit Community Cloud](#deploy-to-streamlit-community-cloud-no-rebuild-in-the-cloud)). It can also be run locally, see [Run locally](#run-locally).
 
 ## Problem
 
@@ -61,8 +61,9 @@ zwtutor/                the tutor itself
   pipeline.py           question -> pre-check -> retrieve -> gate -> generate -> verify -> result
   voice.py              conversational read-aloud (Gemini TTS + browser fallback)
   runtime.py, build.py  loading the index; `python -m zwtutor.build`
+corpus/chunks.jsonl, vectors.npy, index_meta.json   the built search index (committed so deployment needs no rebuild)
 corpus/manifest.json    the list of approved sources (issuer, URL, edition, reuse and currency status)
-scripts/                download_corpus.py, smoke_live.py, list_models.py
+scripts/                download_corpus.py, smoke_live.py, list_models.py, check_deploy_ready.py
 eval/                   30-question evaluation set, run_eval.py, calibrate.py
 tests/                  automated tests (synthetic data, no key needed)
 docs/                   design worksheet, demo script, benchmark protocol
@@ -91,6 +92,18 @@ You need Python 3.10 or newer and a free Gemini API key from [Google AI Studio](
 6. **Get the sources:** `python scripts/download_corpus.py` downloads the PDFs listed in `corpus/manifest.json` into `corpus/pdfs/`. They are not stored in git; check each document's licence. Open each PDF's first page and correct the manifest fields (title, edition, year) if they differ.
 7. **Build the index:** `python -m zwtutor.build` (takes several minutes on the free tier; if it stops, run it again and it resumes). Read the report it prints; sources that are unreadable or fail the identity check are left out.
 8. **Start the app:** `streamlit run app.py` - opens http://localhost:8501
+
+### Deploy to Streamlit Community Cloud (no rebuild in the cloud)
+
+The built search index (`corpus/chunks.jsonl`, `corpus/vectors.npy`, `corpus/index_meta.json`, about 4 MB) is committed to the repository, so the deployed app starts immediately. The source PDFs are never committed.
+
+1. Build locally first (steps 6-7 above) and test with `streamlit run app.py`.
+2. `python scripts/check_deploy_ready.py` - must say "Ready to deploy". It checks the index, that no PDFs, `.env` or secrets are tracked, and lists each source's reuse status.
+3. `git add corpus/chunks.jsonl corpus/vectors.npy corpus/index_meta.json`, commit and push.
+4. At https://share.streamlit.io choose **Create app**, pick this repository, branch `main`, main file `app.py`. Under **Advanced settings** choose Python 3.12 or 3.13 and paste the contents of `.streamlit/secrets.toml.example` into **Secrets** with your real key.
+5. Deploy, then put the app's URL in the "Deployed app" line at the top of this README and in your submission.
+
+Notes: (a) every visitor spends *your* Gemini quota, so keep the per-session question limit and consider a separate key with a budget; (b) if you change the PDFs or the manifest, rebuild locally and commit the three index files again, since a stale index is rejected on start-up; (c) **the index contains passages of the source documents.** Check each source's reuse status (listed by the check script and in `corpus/manifest.json`) before making the repository or the app public. If you are not sure you may republish a source, keep the repository private (Streamlit Community Cloud can deploy private repositories) or leave that source out of the index.
 
 ### Check everything
 
@@ -123,7 +136,7 @@ The following were written but have **not been run against the live service or r
 
 **AI-assisted material:** the code, prompts and documentation in this repository were written with the help of Claude (Anthropic). The `sample/hyperkalemia.txt` sheet and all `tests/` fixtures contain **invented** content for testing and are not clinical references.
 
-**Source documents:** none are redistributed here. See `corpus/manifest.json` for issuer, URL, reuse status and currency status of each, all marked `requires_verification`.
+**Source documents:** the PDFs are not stored here, but the committed search index contains passages of their text (see the Deploy notes on reuse status). See `corpus/manifest.json` for issuer, URL, reuse status and currency status of each, all marked `requires_verification`.
 
 ## Team
 

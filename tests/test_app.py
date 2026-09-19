@@ -44,19 +44,35 @@ class AppT(unittest.TestCase):
                  mock.patch.object(runtime, "load_config", lambda: GateConfig(tau_sem=0.0, tau_cov=0.3)):
                 at = AppTest.from_file(str(Path(__file__).resolve().parent.parent / "app.py"), default_timeout=30).run()
                 self.assertFalse(at.exception, at.exception)
-                self.assertTrue(any("Educational support only" in i.value for i in at.info))
-                self.assertTrue(any("not been calibrated" in w.value for w in at.warning))
+                self.assertTrue(any("Educational support only" in m.value for m in at.markdown))
+                self.assertTrue(any("not been calibrated" in m.value for m in at.markdown))
+                self.assertEqual(len(at.sidebar.children), 0, "no sidebar / key box when the key is configured")
                 at.text_area[0].set_value("How is Zorbex dosed for adults?").run()
                 at.button[0].click().run()
                 self.assertFalse(at.exception, at.exception)
                 self.assertEqual(FakeGen.calls, 1)
                 self.assertTrue(any("Answered from the approved sources" in m.value for m in at.markdown))
+                # visual aid: learning map with a tick per point and a progress bar
+                self.assertTrue(any("0 of 1 points learned" in m.value for m in at.markdown))
+                at.checkbox[0].check().run()
+                self.assertTrue(any("1 of 1 points learned" in m.value for m in at.markdown))
+                self.assertTrue(any('class="card done"' in m.value for m in at.markdown))
                 # a privacy-blocked question must not reach the generator
                 at.text_area[0].set_value("Patient John Moyo needs Zorbex, how is it dosed?").run()
                 at.button[0].click().run()
                 self.assertEqual(FakeGen.calls, 1)
-                self.assertTrue(any("NOT sent to the AI" in e.value for e in at.error))
+                self.assertTrue(any("NOT sent to the AI" in m.value for m in at.markdown))
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NoKey(unittest.TestCase):
+    def test_key_box_is_in_the_page_not_a_sidebar(self):
+        with mock.patch.dict(os.environ, {"GEMINI_API_KEY": ""}), mock.patch.object(runtime, "get_key", lambda: ""):
+            at = AppTest.from_file(str(Path(__file__).resolve().parent.parent / "app.py"), default_timeout=30).run()
+            self.assertFalse(at.exception, at.exception)
+            self.assertEqual(len(at.sidebar.children), 0)
+            self.assertTrue(at.text_input and at.text_input[0].proto.type == 1)  # 1 = PASSWORD
+            self.assertFalse(at.text_area)  # nothing else until a key is given

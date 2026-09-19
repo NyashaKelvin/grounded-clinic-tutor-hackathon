@@ -4,10 +4,9 @@ __pycache__/
 *.pyc
 node_modules/
 harness_report.md
+# Source PDFs are never committed. The BUILT index (corpus/chunks.jsonl, vectors.npy, index_meta.json) IS committed
+# so a deployed app needs no rebuild. It contains passages of the source text: see README, 'Deploy', before making this repo public.
 corpus/pdfs/
-corpus/chunks.jsonl
-corpus/vectors.npy
-corpus/index_meta.json
 corpus/.embed_cache.npz
 corpus/ingest_report.json
 eval/results_*.json

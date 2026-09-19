@@ -1,0 +1,7 @@
+{
+  "embedder": "gemini-embedding-001@768",
+  "dim": 768,
+  "n_chunks": 868,
+  "chunks_sha256": "47c0a8bcc2eadfe31a1b62b9f6c517ae6f413c05703832078103b1526857f6c5",
+  "built_at": "2026-09-19 13:28:26"
+}

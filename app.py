@@ -17,13 +17,49 @@ from zwtutor.schema import MODES
 from zwtutor.verify import locate_quote
 
 load_dotenv()
-st.set_page_config(page_title="Zimbabwe Nursing Tutor", page_icon="🩺", layout="wide")
+st.set_page_config(page_title="Zimbabwe Nursing Tutor", page_icon="+", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""<style>
-.badge{display:inline-block;padding:.25rem .7rem;border-radius:999px;font-weight:700;font-size:.9rem;margin:.2rem 0}
-.b-ok{background:#d8f5df;color:#0b5c22}.b-warn{background:#fff0c9;color:#7a4b00}.b-bad{background:#fde0e0;color:#8a1111}
-.passage{background:#f6f7f9;border-left:4px solid #9aa4b2;padding:.6rem .8rem;border-radius:6px;font-size:.92rem;white-space:pre-wrap;color:#1f2933}
-.passage mark{background:#ffe27a;padding:0 2px}
-.aid{font-size:2rem;font-weight:800;text-align:center;padding:.8rem;border:2px dashed #1b5fd1;border-radius:12px}
+:root{--ink:#1B2A32;--muted:#5B6B73;--line:#D9E1DE;--card:#FFFFFF;--brand:#0F5C63;--brand-soft:#E4F0EE;--gold:#B7791F;
+--ok:#1F6B4A;--ok-bg:#E3F1EB;--warn:#8A5A12;--warn-bg:#FBF1DF;--bad:#8E2F2F;--bad-bg:#F8E6E6;--info:#2B5F8A;--info-bg:#E6EFF7}
+.block-container{max-width:1080px;padding-top:2.2rem;padding-bottom:4rem}
+#MainMenu,footer,[data-testid="stToolbar"],[data-testid="stDecoration"]{visibility:hidden;height:0}
+h1{font-weight:750;letter-spacing:-.02em;color:var(--brand);margin-bottom:.1rem}
+h3{color:var(--ink)}
+.tagline{color:var(--muted);font-size:1.02rem;margin:0 0 1rem 0}
+.notice{background:var(--brand-soft);border:1px solid #C9DEDA;border-left:4px solid var(--brand);border-radius:8px;padding:.7rem 1rem;color:var(--ink);font-size:.9rem;line-height:1.45;margin-bottom:1.1rem}
+.notice small{display:block;color:var(--muted);margin-top:.35rem}
+.badge{display:inline-block;padding:.28rem .8rem;border-radius:999px;font-weight:650;font-size:.85rem;margin:.2rem 0 .5rem 0;letter-spacing:.01em}
+.b-ok{background:var(--ok-bg);color:var(--ok)}.b-warn{background:var(--warn-bg);color:var(--warn)}.b-bad{background:var(--bad-bg);color:var(--bad)}
+.callout{border-radius:8px;padding:.8rem 1rem;margin:.2rem 0 .8rem 0;line-height:1.5;border:1px solid transparent}
+.c-b-ok{background:var(--ok-bg);border-color:#BFDDCE}.c-b-warn{background:var(--warn-bg);border-color:#EBD6AE}.c-b-bad{background:var(--bad-bg);border-color:#E9C4C4}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.85rem 1.05rem;box-shadow:0 1px 2px rgba(15,40,45,.04)}
+.card.done{background:#F1F8F4;border-color:#BFDDCE}
+.stext{font-size:1.02rem;line-height:1.55;color:var(--ink)}
+.chip{display:inline-block;margin-top:.5rem;padding:.12rem .55rem;border-radius:6px;background:var(--brand-soft);color:var(--brand);font-size:.76rem;font-weight:600}
+.prog{height:8px;background:#E3E9E7;border-radius:999px;overflow:hidden;margin:.3rem 0 .2rem 0}
+.prog>div{height:100%;background:linear-gradient(90deg,var(--brand),#2E8C8F);border-radius:999px;transition:width .3s}
+.progtext{font-size:.85rem;color:var(--muted);margin-bottom:.9rem}
+.passage{background:#F4F6F5;border-left:4px solid #9DB3AF;padding:.7rem .9rem;border-radius:6px;font-size:.92rem;white-space:pre-wrap;color:var(--ink)}
+.passage mark{background:#F6E2A6;padding:0 2px;border-radius:2px}
+.aid{display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0 1rem 0}
+.tile{min-width:92px;text-align:center;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--brand);border-radius:10px;padding:.55rem .7rem}
+.tile b{display:block;font-size:2rem;line-height:1.1;color:var(--brand)}
+.tile span{display:block;font-size:.85rem;color:var(--ink);margin-top:.15rem}
+.tile i{display:block;font-size:.72rem;color:var(--muted);font-style:normal;margin-top:.2rem}
+.aidname{font-size:.85rem;color:var(--muted);margin-top:.6rem}
+.qcard{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:.8rem 1rem;margin:.5rem 0 .2rem 0}
+.stTabs [data-baseweb="tab"]{font-weight:600}
+.stTabs [aria-selected="true"]{color:var(--brand)}
+.stTabs [data-baseweb="tab-highlight"]{background-color:var(--brand)}
+[data-testid="stBaseButton-primary"]{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:650;border-radius:8px}
+[data-testid="stBaseButton-primary"]:hover{background:#0B4A50;border-color:#0B4A50;color:#fff}
+[data-testid="stBaseButton-secondary"]{border-radius:8px;border-color:var(--line);color:var(--ink)}
+[data-testid="stBaseButton-secondary"]:hover{border-color:var(--brand);color:var(--brand)}
+[data-testid="stBaseButton-pills"]{border-radius:999px;border-color:var(--line);background:#fff;color:var(--ink)}
+[data-testid="stBaseButton-pills"]:hover{border-color:var(--brand);color:var(--brand)}
+[data-testid="stBaseButton-pillsActive"]{border-radius:999px;background:var(--brand);border-color:var(--brand);color:#fff}
+[data-testid="stCheckbox"] [data-baseweb="checkbox"] span[role="checkbox"]{border-color:var(--brand)}
+div[data-testid="stCheckbox"] label p{font-size:.8rem;color:var(--muted)}
 </style>""", unsafe_allow_html=True)
 
 STATE_LOOK = {
@@ -36,6 +72,7 @@ STATE_LOOK = {
     State.NEEDS_CLARIFICATION: ("Need more detail", "b-warn"),
     State.PRIVACY_BLOCKED: ("Blocked: personal information", "b-bad"),
 }
+MAX_QUESTIONS_PER_SESSION = int(os.getenv("MAX_QUESTIONS_PER_SESSION", "40") or 40)
 EXAMPLES = ["What does the national guideline say about PMTCT for a breastfeeding mother?",
             "What are the danger signs to check for in the newborn after birth?",
             "Which infection prevention steps apply when handling sharps?",
@@ -80,24 +117,51 @@ def render_hits(hits, title: str):
             show_passage(h.chunk)
 
 
+def short_src(c) -> str:
+    ch = c.chunk
+    title = ch.document_title if len(ch.document_title) <= 46 else ch.document_title[:45] + "..."
+    return f"{title}  |  p. {ch.page_number or ch.pdf_page}"
+
+
+def render_learning_map(r, key: str):
+    """The visual aid: the verified points as a step-by-step map. Tick each one as you learn it;
+    the card turns green and the progress bar fills. Text is shown exactly as verified."""
+    n = len(r.points)
+    learned = sum(1 for i in range(n) if st.session_state.get(f"got_{key}_{i}"))
+    pct = int(100 * learned / n) if n else 0
+    st.markdown(f'<div class="prog"><div style="width:{pct}%"></div></div>'
+                f'<div class="progtext">{learned} of {n} points learned'
+                f'{" - well done!" if n and learned == n else ""}</div>', unsafe_allow_html=True)
+    for i, p in enumerate(r.points):
+        c1, c2 = st.columns([0.07, 0.93], vertical_alignment="top")
+        with c1:
+            done = st.checkbox(f"Mark point {i + 1} as learned", key=f"got_{key}_{i}", label_visibility="collapsed")
+        with c2:
+            cites = [c for c in p["citations"] if c.verified]
+            chip = f'<span class="chip">{esc(short_src(cites[0]))}</span>' if cites else ""
+            st.markdown(f'<div class="card {"done" if done else ""}"><div class="stext">{esc(p["text"])}</div>{chip}</div>',
+                        unsafe_allow_html=True)
+            render_citations(p["citations"], f"{key}p{i}")
+
+
 def render_result(r, key: str):
     label, cls = STATE_LOOK[r.state]
     st.markdown(f'<span class="badge {cls}">{label}</span>', unsafe_allow_html=True)
     if r.message:
-        (st.error if cls == "b-bad" else st.warning)(r.message)
+        st.markdown(f'<div class="callout c-{cls}">{esc(r.message)}</div>', unsafe_allow_html=True)
     if r.conflict:
-        st.info("Difference: " + r.conflict["description"])
+        st.markdown(f'<div class="callout c-b-warn"><b>The difference:</b> {esc(r.conflict["description"])}</div>', unsafe_allow_html=True)
     if r.answer:
         st.markdown(r.answer)
-    for i, p in enumerate(r.points):
-        st.markdown(f"**{i + 1}.** {p['text']}")
-        render_citations(p["citations"], f"{key}p{i}")
+    if r.points:
+        render_learning_map(r, key)
     if r.memory_aid:
-        st.markdown(f'<div class="aid">{esc(r.memory_aid["text"])}</div>', unsafe_allow_html=True)
-        for l in r.memory_aid["letters"]:
-            st.markdown(f"- **{l['letter']}** = {l['stands_for']} (point {l['point_index'] + 1})")
+        st.markdown('<div class="aidname">Memory aid: each letter is tied to a verified point above</div>', unsafe_allow_html=True)
+        tiles = "".join(f'<div class="tile"><b>{esc(l["letter"])}</b><span>{esc(l["stands_for"])}</span><i>point {l["point_index"] + 1}</i></div>'
+                        for l in r.memory_aid["letters"])
+        st.markdown(f'<div class="aid">{tiles}</div>', unsafe_allow_html=True)
     for i, q in enumerate(r.quiz):
-        st.markdown(f"**Q{i + 1}. {q['question']}**")
+        st.markdown(f'<div class="qcard"><b>Question {i + 1}.</b> {esc(q["question"])}</div>', unsafe_allow_html=True)
         for o in q.get("options", []):
             st.markdown(f"- {o}")
         with st.expander("Show answer"):
@@ -152,49 +216,77 @@ def voice_controls(r, key: str, api_key: str):
 
 
 # ------------------------------------------------------------------ page
-st.title("🩺 Zimbabwe Nursing Tutor")
-st.info(M.EDUCATION_NOTICE)
-st.warning(M.PRIVACY_WARNING)
+st.title("Zimbabwe Nursing Tutor")
+st.markdown('<p class="tagline">Learn from approved Zimbabwean guidelines. Every quote is checked, and it tells you when the sources do not cover your question.</p>',
+            unsafe_allow_html=True)
 
-with st.sidebar:
-    st.header("Setup")
-    key_in = st.text_input("Gemini API key", type="password", value="", help="Or put it in .env as GEMINI_API_KEY. Never committed to git.")
-    api_key = key_in.strip() or runtime.get_key()
-    strict = st.toggle("Strict verification", value=True, help="On: any failed quote or number check means no answer is shown.")
-    st.caption("Needs an internet connection. Refreshing the page clears the current answer.")
-    st.caption("Sources are teaching aids. Editions and currency status are shown with every citation.")
+
+def find_key() -> str:
+    """Key from .env / environment, or Streamlit secrets (for a deployed app). Never shown in the UI."""
+    k = runtime.get_key()
+    if k:
+        return k
+    try:
+        return str(st.secrets.get("GEMINI_API_KEY", "")).strip()
+    except Exception:  # noqa: BLE001  (no secrets file)
+        return ""
+
+
+api_key = find_key()
+if not api_key:
+    # No key configured on the server: ask once, in the page. There is no sidebar in this app.
+    st.markdown('<div class="notice"><b>One-time setup.</b> This tutor needs a Gemini API key. Paste it below; it is kept only in this browser session '
+                'and is never saved or shown again. (Site owners: put it in <code>.env</code> to skip this step.)</div>', unsafe_allow_html=True)
+    typed = st.text_input("Gemini API key", type="password", value=st.session_state.get("typed_key", ""), label_visibility="collapsed",
+                          placeholder="Paste your Gemini API key")
+    st.session_state["typed_key"] = typed.strip()
+    api_key = typed.strip()
+    if not api_key:
+        st.stop()
 
 try:
-    tutor_obj = st.cache_resource(runtime.load_tutor, show_spinner="Loading the source index...")(api_key, strict)
+    tutor_obj = st.cache_resource(runtime.load_tutor, show_spinner="Loading the source index...")(api_key, True)
 except runtime.SetupError as exc:
-    st.error(str(exc))
+    st.markdown(f'<div class="callout c-b-bad">{esc(str(exc))}</div>', unsafe_allow_html=True)
     st.stop()
 except legacy.TutorError as exc:
-    st.error(exc.user_message)
+    st.markdown(f'<div class="callout c-b-bad">{esc(exc.user_message)}</div>', unsafe_allow_html=True)
     st.stop()
 
-if not tutor_obj.cfg.calibrated:
-    st.warning(M.UNCALIBRATED)
+st.markdown(f'<div class="notice"><b>{esc(M.EDUCATION_NOTICE)}</b><small>{esc(M.PRIVACY_WARNING)}</small>'
+            + ("" if tutor_obj.cfg.calibrated else f"<small>{esc(M.UNCALIBRATED)}</small>") + "</div>", unsafe_allow_html=True)
 
 tab_ask, tab_browse, tab_bench, tab_src = st.tabs(["Ask the tutor", "Browse topics", "Tutor vs plain Gemini", "Sources"])
 
 with tab_ask:
     ex = st.selectbox("Try an example (or type your own below)", [""] + EXAMPLES)
     q = st.text_area("Your study question", value=ex, height=90, max_chars=600, placeholder="e.g. What are the postnatal checks for a newborn?")
-    mode = st.radio("How should I teach it?", list(MODES), format_func=lambda m: MODES[m][0], horizontal=True)
+    st.markdown("**How should I teach it?**")
+    if hasattr(st, "pills"):
+        mode = st.pills("Teaching mode", list(MODES), default="explain", selection_mode="single",
+                        format_func=lambda m: MODES[m][0], label_visibility="collapsed") or "explain"
+    else:
+        mode = st.radio("Teaching mode", list(MODES), format_func=lambda m: MODES[m][0], horizontal=True, label_visibility="collapsed")
+    used = st.session_state.get("asked", 0)
     if st.button("Ask", type="primary"):
+        if used >= MAX_QUESTIONS_PER_SESSION:
+            st.markdown('<div class="callout c-b-warn">You have reached the question limit for this session (it protects the shared '
+                        'Gemini quota). Refresh the page to start a new session.</div>', unsafe_allow_html=True)
+            st.stop()
+        st.session_state["asked"] = used + 1
         try:
             with st.spinner("Searching the sources and checking every quote..."):
                 st.session_state["last"] = tutor_obj.ask(q, mode)
+                st.session_state["rid"] = st.session_state.get("rid", 0) + 1  # new answer: fresh learning tracker
         except legacy.TutorError as exc:
             st.session_state["last"] = None
-            st.error(exc.user_message)
+            st.markdown(f'<div class="callout c-b-bad">{esc(exc.user_message)}</div>', unsafe_allow_html=True)
             if exc.detail:
                 with st.expander("Technical detail (for debugging)"):
                     st.code(str(exc.detail)[:600])
     r = st.session_state.get("last")
     if r:
-        render_result(r, "a")
+        render_result(r, f"a{st.session_state.get('rid', 0)}")
         voice_controls(r, "a", api_key)
 
 with tab_browse:
@@ -213,10 +305,11 @@ with tab_browse:
             try:
                 with st.spinner("Working..."):
                     st.session_state["browse_r"] = tutor_obj.ask(f"Explain {topic}", bm)
+                    st.session_state["brid"] = st.session_state.get("brid", 0) + 1
             except legacy.TutorError as exc:
                 st.error(exc.user_message)
         if st.session_state.get("browse_r"):
-            render_result(st.session_state["browse_r"], "b")
+            render_result(st.session_state["browse_r"], f"b{st.session_state.get('brid', 0)}")
 
 with tab_bench:
     st.caption("Same question, two ways: plain Gemini with a medical prompt (no sources, no checks) vs this tutor.")
@@ -242,6 +335,10 @@ with tab_bench:
                 st.error(exc.user_message)
 
 with tab_src:
+    with st.expander("Settings"):
+        tutor_obj.strict = st.toggle("Strict verification", value=tutor_obj.strict,
+                                     help="On: if any quote or number fails the check, no answer is shown. Turn off only for testing.")
+        st.caption("Needs an internet connection. Refreshing the page clears the current answer and your progress ticks.")
     seen = {}
     for c in tutor_obj.index.chunks:
         seen.setdefault(c.source_id, c)
