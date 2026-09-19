@@ -1,0 +1,30 @@
+{
+  "EDLIZ2015": {
+    "sha256": "2e351171df5c38854f496b1eb50713f806f79c9992b830ec74afe56644f4bf72",
+    "bytes": 8206015,
+    "retrieved_on": "2026-09-19",
+    "final_url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/essential-medicines-and-equipment/zwe-ch-43-01-emd-2015-eng-edliz-2015.pdf",
+    "file": "corpus/pdfs/EDLIZ2015.pdf"
+  },
+  "HIV2022": {
+    "sha256": "b02077ed50ad660c744cbbe9abf9250a6209abfd44f9063f16bde03714650254",
+    "bytes": 9401286,
+    "retrieved_on": "2026-09-19",
+    "final_url": "https://www.prepwatch.org/wp-content/uploads/2023/08/Guidelines-for-HIV-Prevention-Testing-and-Treatment-of-HIV-in-Zimbabwe-August-2022.pdf",
+    "file": "corpus/pdfs/HIV2022.pdf"
+  },
+  "POSTNATAL": {
+    "sha256": "e82450f74b2518f42ba9abdbbc5d5edecd2fee2c268383c78271c7c923e60fff",
+    "bytes": 758019,
+    "retrieved_on": "2026-09-19",
+    "final_url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/guideline/zwe-mn-48-01-guideline-2012-eng-national-postnatal-care-guidelines.pdf?sfvrsn=4219babe_2",
+    "file": "corpus/pdfs/POSTNATAL.pdf"
+  },
+  "AEFI3": {
+    "sha256": "de09b5ca730f950d754ebf2224d40ea4f77a3bdccbc62d8190d9218168863d14",
+    "bytes": 18340611,
+    "retrieved_on": "2026-09-19",
+    "final_url": "https://www.mcaz.co.zw/wp-content/uploads/2021/12/Adverse-Events-Following-Immunization-Surveillance-Guidelines-3rd-Edition.pdf",
+    "file": "corpus/pdfs/AEFI3.pdf"
+  }
+}

@@ -121,7 +121,7 @@ def _():
 
 @check("A. Repository structure", "Guide 16", "All files compile as valid Python")
 def _():
-    for f in ("app.py", "tutor.py", "test_gemini.py", "harness.py"):
+    for f in ("app.py", "app_paste_mode.py", "tutor.py", "test_gemini.py", "harness.py"):
         compile(read(f), f, "exec")  # syntax check only; writes nothing
 
 
@@ -214,7 +214,7 @@ def _():
 @check("C. Secrets", "Guide 10", "Code never hard-codes api_key=\"...\"")
 def _():
     bad = []
-    for f in ("app.py", "tutor.py", "test_gemini.py"):
+    for f in ("app.py", "app_paste_mode.py", "tutor.py", "test_gemini.py"):
         for i, l in enumerate(read(f).splitlines(), 1):
             if re.search(r"api_key\s*=\s*[\"'][^\"']+[\"']", l):
                 bad.append(f"{f}:{i}")
@@ -259,7 +259,7 @@ def _():
     imports = {n.module for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.module}
     assert "google" in imports or any(i.startswith("google") for i in imports), "google-genai not imported"
     assert "models.generate_content(" in src, "no generate_content call"
-    assert "tutor.ask_tutor(" in read("app.py"), "app.py does not go through tutor.ask_tutor -> Gemini"
+    assert "tutor.ask_tutor(" in read("app_paste_mode.py"), "app.py does not go through tutor.ask_tutor -> Gemini"
 
 
 @check("D. Gemini integration", "Spec 5.1", "System instruction restricts answers to the supplied material and requires refusal")
@@ -465,7 +465,7 @@ def _():
 
 @check(F, "Guide 15 table: Refresh / Internet", "App tells users what refresh clears, that it needs internet; demo doc covers backup screenshots")
 def _():
-    app = read("app.py").lower()
+    app = read("app_paste_mode.py").lower()
     assert "refresh" in app and "internet" in app, "app should tell users what refreshing loses / that internet is needed"
     assert "screenshot" in read("docs/DEMO_SCRIPT.md").lower(), "no backup-screenshot reminder"
 
@@ -477,7 +477,7 @@ S = "G. Streamlit app (headless)"
 def app_test(env_key=""):
     from streamlit.testing.v1 import AppTest
     os.environ["GEMINI_API_KEY"] = env_key  # empty string wins over .env (load_dotenv never overrides)
-    at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30)
+    at = AppTest.from_file(str(ROOT / "app_paste_mode.py"), default_timeout=30)
     at.run()
     return at
 
@@ -706,6 +706,86 @@ def _():
         if warn:
             return WARN, warn
         assert ans.status == "not_found", f"answered off-material for {q!r}: status={ans.status}"
+
+
+# ========================================================= K. ZIMBABWE NURSING TUTOR
+K = "K. Zimbabwe nursing tutor (RAG + gate + verify)"
+
+
+@check(K, "Spec 12-15", "Unit + pipeline + app tests pass (verification, gate, safety, voice, eval scaffolding)")
+def _():
+    r = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-t", "."], capture_output=True, text=True, timeout=300)
+    tail = (r.stderr or "").strip().splitlines()[-3:]
+    assert r.returncode == 0, " | ".join(tail)
+    return (PASS, tail[-2] if len(tail) > 1 else "")
+
+
+@check(K, "Spec 8", "No answering-model call is possible below the gate or after a pre-check refusal (tested with a call counter)")
+def _():
+    src = read("tests/test_pipeline.py")
+    assert "test_below_gate_no_call" in src and "test_precheck_refusals_no_call" in src and "g.calls, 0" in src
+
+
+@check(K, "Spec 3", "corpus/manifest.json: every source has issuer, URL, currency status, reuse status; none is marked verified without a note")
+def _():
+    import json
+    man = json.loads(read("corpus/manifest.json"))["sources"]
+    need = ("source_id", "institution", "document_title", "document_url", "currency_status", "licence_or_reuse_status")
+    bad = [s.get("source_id", "?") for s in man if any(k not in s for k in need)]
+    assert not bad, f"incomplete: {bad}"
+    unv = [s["source_id"] for s in man if s["currency_status"] == "verified_current" and not s.get("currency_note")]
+    assert not unv, f"marked verified_current with no note: {unv}"
+
+
+@check(K, "Spec 3", "Corpus PDFs downloaded and index built", )
+def _():
+    pdfs = list((ROOT / "corpus" / "pdfs").glob("*.pdf"))
+    if not pdfs:
+        return (WARN, "no PDFs yet: run  python scripts/download_corpus.py")
+    if not (ROOT / "corpus" / "chunks.jsonl").exists() or not (ROOT / "corpus" / "vectors.npy").exists():
+        return (WARN, f"{len(pdfs)} PDFs present but not indexed: run  python -m zwtutor.build")
+    return (PASS, f"{len(pdfs)} PDFs indexed")
+
+
+@check(K, "Spec 11", "Evidence-gate thresholds calibrated on the labelled evaluation set")
+def _():
+    from zwtutor.gate import load_config
+    if not load_config().calibrated:
+        return (WARN, "placeholders in use: label eval/questions.jsonl grounded items, then run  python eval/calibrate.py")
+
+
+@check(K, "Spec 10-11", "Evaluation set has 30 questions in the required categories; grounded ones labelled by a human")
+def _():
+    from eval.run_eval import load_questions
+    qs = load_questions()
+    assert len(qs) == 30
+    unl = [q["id"] for q in qs if q["category"] == "grounded" and not q["labelled"]]
+    if unl:
+        return (WARN, f"{len(unl)} grounded questions still need a human to confirm the passage and fill expected_chunk_ids")
+
+
+@check(K, "Spec 16", ".gitignore keeps downloaded PDFs and built index out of git")
+def _():
+    lines = {l.strip() for l in read(".gitignore").splitlines()}
+    missing = [x for x in ("corpus/pdfs/", "corpus/chunks.jsonl", "corpus/vectors.npy") if x not in lines]
+    assert not missing, f"missing: {missing}"
+
+
+@check(K, "Spec 16", "README states what was built on hack day vs pre-existing (PIVOT) and lists limitations")
+def _():
+    t = read("README.md").lower()
+    assert "pivot" in t and "pre-existing" in t and "not yet verified" in t, "add the build-boundary / PIVOT disclosure and a 'Not yet verified' list"
+
+
+@check(K, "Spec 9", "New app.py without a built corpus fails gracefully (setup instructions, no traceback)")
+def _():
+    from unittest import mock
+    from streamlit.testing.v1 import AppTest
+    from zwtutor import ingest
+    with mock.patch.object(ingest, "CHUNKS", ROOT / "corpus" / "__missing__.jsonl"):
+        at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30).run()
+    assert not at.exception, [e.value for e in at.exception]
+    assert any("corpus" in e.value.lower() for e in at.error)
 
 
 # ================================================================ J. MANUAL

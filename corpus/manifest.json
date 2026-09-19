@@ -1,0 +1,65 @@
+{
+  "_readme": "Source register for the Zimbabwe Nursing Tutor. Fields marked 'not stated' or currency 'requires_verification' were NOT confirmed by the team yet. Edit this file after opening each PDF's first pages; the app shows these values to learners.",
+  "sources": [
+    {
+      "source_id": "EDLIZ2015",
+      "institution": "Ministry of Health and Child Care, National Medicine and Therapeutics Policy Advisory Committee (NMTPAC)",
+      "document_title": "EDLIZ 2015: Essential Medicines List and Standard Treatment Guidelines for Zimbabwe",
+      "edition": "7th edition",
+      "publication_year": "2015",
+      "document_url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/essential-medicines-and-equipment/zwe-ch-43-01-emd-2015-eng-edliz-2015.pdf",
+      "licence_or_reuse_status": "Document states: no reproduction without written permission of the copyright holder, except for private study, research, criticism, review or teaching, not for sale or commercial use.",
+      "clinical_topic": "essential medicines; standard treatment guidelines",
+      "currency_status": "requires_verification",
+      "currency_note": "2015 is the newest edition confirmed so far; a later edition may exist.",
+      "pdf_filename": "EDLIZ2015.pdf",
+      "min_pages": 300,
+      "title_keywords": ["essential", "treatment guidelines"]
+    },
+    {
+      "source_id": "HIV2022",
+      "institution": "Ministry of Health and Child Care, NMTPAC and AIDS and TB Directorate",
+      "document_title": "Guidelines for HIV Prevention, Testing, and Treatment of HIV in Zimbabwe",
+      "edition": "not stated",
+      "publication_year": "2022",
+      "document_url": "https://www.prepwatch.org/wp-content/uploads/2023/08/Guidelines-for-HIV-Prevention-Testing-and-Treatment-of-HIV-in-Zimbabwe-August-2022.pdf",
+      "licence_or_reuse_status": "not stated on the pages checked",
+      "clinical_topic": "HIV testing; ART; PMTCT; paediatric ART; PEP",
+      "currency_status": "requires_verification",
+      "currency_note": "August 2022 copy hosted by PrEPWatch (AVAC), not the issuer; a newer MoHCC version may exist.",
+      "pdf_filename": "HIV2022.pdf",
+      "min_pages": 60,
+      "title_keywords": ["hiv", "zimbabwe"]
+    },
+    {
+      "source_id": "POSTNATAL",
+      "institution": "Ministry of Health and Child Welfare, Reproductive Health Unit (name as printed in the document)",
+      "document_title": "National Postnatal Care Guidelines: Caring for the Mothers and Newborns",
+      "edition": "not stated",
+      "publication_year": "not stated",
+      "document_url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/guideline/zwe-mn-48-01-guideline-2012-eng-national-postnatal-care-guidelines.pdf?sfvrsn=4219babe_2",
+      "licence_or_reuse_status": "not stated on the pages checked",
+      "clinical_topic": "postnatal care; maternal and newborn health",
+      "currency_status": "requires_verification",
+      "currency_note": "No year is printed in the document; the file name suggests 2012.",
+      "pdf_filename": "POSTNATAL.pdf",
+      "min_pages": 15,
+      "title_keywords": ["postnatal"]
+    },
+    {
+      "source_id": "AEFI3",
+      "institution": "Medicines Control Authority of Zimbabwe (MCAZ)",
+      "document_title": "Adverse Events Following Immunization Surveillance Guidelines",
+      "edition": "3rd edition",
+      "publication_year": "2021",
+      "document_url": "https://www.mcaz.co.zw/?sdm_process_download=1&download_id=2522",
+      "licence_or_reuse_status": "not stated on the pages checked",
+      "clinical_topic": "immunisation safety; AEFI reporting",
+      "currency_status": "requires_verification",
+      "currency_note": "Listed on the MCAZ site as published 4 Dec 2021; a 4th edition may exist (unverified).",
+      "pdf_filename": "AEFI3.pdf",
+      "min_pages": 20,
+      "title_keywords": ["adverse events", "immuni"]
+    }
+  ]
+}
