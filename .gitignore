@@ -11,3 +11,8 @@ corpus/index_meta.json
 corpus/.embed_cache.npz
 corpus/ingest_report.json
 eval/results_*.json
+.streamlit/secrets.toml
+*.log
+.DS_Store
+.idea/
+.vscode/

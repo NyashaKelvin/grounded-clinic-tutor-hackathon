@@ -26,5 +26,5 @@ Structure from the guide (section 17). Show the **running app**, not slides.
 - **Description:** A study aid that explains clinical protocols and builds mnemonics only from course material the student supplies, and visibly refuses when the material doesn't cover the question.
 - **Technologies:** Python, Streamlit, Google Gemini API (google-genai), python-dotenv
 - **Repository link:** TODO (team)
-- **Team information:** TODO (team)
+- **Team information:** Leroy Mapunzwana, Nyasha Madoro, Euclide Mtisi, Ethel Kuvirima
 - **Challenge:** Best Use of the Google Gemini API

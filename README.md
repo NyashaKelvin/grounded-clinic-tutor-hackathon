@@ -4,6 +4,10 @@ A study aid for Zimbabwean nursing students that answers **only** from a curated
 
 *Hack for Humanity Harare 2026 - Challenge: **Best Use of the Google Gemini API***
 
+**Participants:** Leroy Mapunzwana, Nyasha Madoro, Euclide Mtisi, Ethel Kuvirima
+
+**Deployed app:** not deployed yet (the source PDFs are not stored in this repository, so the app is run locally; see [Run locally](#run-locally)). If a hosted version is added, put the link here: `[PLACEHOLDER: deployed URL]`.
+
 ## Problem
 
 Nursing students in Zimbabwe often study from scattered, photocopied or outdated material and have little access to educators for real-time clarification. Generic chatbots answer confidently from foreign training data, with no way to check the answer against the guidelines a Zimbabwean nurse is actually examined on and works by. A fluent wrong answer is more dangerous than no answer.
@@ -40,20 +44,53 @@ Gemini is used in three places, all through the official `google-genai` SDK:
 
 `tutor.py` (`call_gemini()`) is the earlier paste-your-own-material mode, kept as `app_paste_mode.py`; its error translation is reused by the new pipeline.
 
+## Project structure
+
+```
+app.py                  Streamlit app (the submitted UI)
+app_paste_mode.py       earlier paste-your-own-material mode (kept for reference)
+tutor.py                Gemini call + error translation used by paste mode and reused by the pipeline
+zwtutor/                the tutor itself
+  ingest.py             PDF -> passages with page, section and edition metadata
+  embed.py              Gemini embeddings (+ a test-only offline embedder)
+  index.py, retrieve.py hybrid search: meaning (embeddings) + keywords (BM25)
+  gate.py               evidence gate: below the threshold the answering model is never called
+  safety.py             privacy / emergency / scope pre-checks (no AI)
+  schema.py, generate.py  Gemini structured answers, modes, model auto-discovery
+  verify.py             quote / number / claim / memory-aid verification
+  pipeline.py           question -> pre-check -> retrieve -> gate -> generate -> verify -> result
+  voice.py              conversational read-aloud (Gemini TTS + browser fallback)
+  runtime.py, build.py  loading the index; `python -m zwtutor.build`
+corpus/manifest.json    the list of approved sources (issuer, URL, edition, reuse and currency status)
+scripts/                download_corpus.py, smoke_live.py, list_models.py
+eval/                   30-question evaluation set, run_eval.py, calibrate.py
+tests/                  automated tests (synthetic data, no key needed)
+docs/                   design worksheet, demo script, benchmark protocol
+harness.py              checks the repo against the hackathon guide
+requirements.txt        dependencies
+.env.example            template for your key (copy to .env; .env is git-ignored)
+node-prototype/         first prototype in Node.js (not part of the submitted app)
+```
+
 ## Tech stack
 
 Python 3.10+, Streamlit, google-genai, python-dotenv, NumPy, PyMuPDF. Default answer model `gemini-2.5-flash` (`GEMINI_MODEL` in `.env`).
 
 ## Run locally
 
-1. `python -m venv .venv`
-2. Activate it: Windows `.venv\Scripts\activate` (PowerShell: `.venv\Scripts\Activate.ps1`), macOS/Linux `source .venv/bin/activate`
-3. `pip install -r requirements.txt`
-4. Copy `.env.example` to `.env` and put your key from [Google AI Studio](https://aistudio.google.com/) after `GEMINI_API_KEY=` (or type it in the app sidebar).
-5. `python test_gemini.py` - one-request check that your key and SDK work.
-6. **Get the sources:** `python scripts/download_corpus.py` downloads the PDFs listed in `corpus/manifest.json` into `corpus/pdfs/` (they are not stored in git; check each licence). Open each PDF's first page and correct the manifest fields (edition, year, issuer) if they differ.
-7. **Build the index:** `python -m zwtutor.build` (chunks the PDFs with page and section metadata, embeds them, prints an identity-check report - read it).
-8. `streamlit run app.py` - opens http://localhost:8501
+You need Python 3.10 or newer and a free Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey).
+
+1. Get the code: `git clone <this repository's URL>` then `cd` into the folder.
+2. Create and activate a virtual environment:
+   - `python -m venv .venv`
+   - Windows: `.venv\Scripts\activate` (PowerShell: `.venv\Scripts\Activate.ps1`); macOS/Linux: `source .venv/bin/activate`
+3. Install the dependencies: `pip install -r requirements.txt`
+   *(with [uv](https://docs.astral.sh/uv/) instead: `uv venv`, `uv pip install -r requirements.txt`, and put `uv run` before the commands below)*
+4. Add your key: copy `.env.example` to `.env` and put the key after `GEMINI_API_KEY=`. **Never commit `.env`**; it is git-ignored. (Or type the key into the app's sidebar.)
+5. `python scripts/smoke_live.py` - checks that your key works for embeddings, answers and voice. `python scripts/list_models.py` shows which models your key can use if you need to set `GEMINI_MODEL`.
+6. **Get the sources:** `python scripts/download_corpus.py` downloads the PDFs listed in `corpus/manifest.json` into `corpus/pdfs/`. They are not stored in git; check each document's licence. Open each PDF's first page and correct the manifest fields (title, edition, year) if they differ.
+7. **Build the index:** `python -m zwtutor.build` (takes several minutes on the free tier; if it stops, run it again and it resumes). Read the report it prints; sources that are unreadable or fail the identity check are left out.
+8. **Start the app:** `streamlit run app.py` - opens http://localhost:8501
 
 ### Check everything
 
@@ -90,7 +127,14 @@ The following were written but have **not been run against the live service or r
 
 ## Team
 
-- TODO: add team member names and roles (guide Appendix E: problem lead, builder, prompt/test lead, UX/docs lead)
+| Name | Role |
+|---|---|
+| Leroy Mapunzwana | Participant |
+| Nyasha Madoro | Participant |
+| Euclide Mtisi | Participant |
+| Ethel Kuvirima | Participant |
+
+*(Roles can be refined to the guide's suggested split: problem lead, builder, prompt and test lead, UX and docs lead.)*
 
 ## Documentation
 
